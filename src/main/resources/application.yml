@@ -1,0 +1,69 @@
+# =============================================================================
+# Solar CSMS — Application Configuration
+# =============================================================================
+
+# --- MQTT broker (SmallRye connector defaults) ---
+mp:
+  messaging:
+    connector:
+      smallrye-mqtt:
+        host: localhost
+        port: 1883
+        client-id: solar-csms
+
+    # --- Inbound: driver location requests (wildcard topic) ---
+    incoming:
+      driver-location-request:
+        connector: smallrye-mqtt
+        topic: "drivers/+/request/location"
+        qos: 1
+
+    # --- Outbound: static channel (dynamic publishes use MqttClient directly) ---
+    outgoing:
+      station-location-response:
+        connector: smallrye-mqtt
+        topic: stations/available/broadcast
+        qos: 1
+
+# --- PostgreSQL + Hibernate ORM ---
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: csms
+    password: csms
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/csmsdb
+
+  hibernate-orm:
+    database:
+      generation: none
+    dialect: org.hibernate.spatial.dialect.postgis.PostgisPG95Dialect
+
+  flyway:
+    migrate-at-start: true
+
+  # --- JVM (dev/run): Woodstox StAX — avoids com.bea.xml.stream.* FactoryConfigurationError on Java 22+ ---
+  jvm:
+    args: "-Djavax.xml.stream.XMLInputFactory=com.ctc.wstx.stax.WstxInputFactory -Djavax.xml.stream.XMLOutputFactory=com.ctc.wstx.stax.WstxOutputFactory -Djavax.xml.stream.XMLEventFactory=com.ctc.wstx.stax.WstxEventFactory --add-opens=java.base/java.lang=ALL-UNNAMED"
+
+  # --- OCPP WebSocket ---
+  websocket:
+    dispatch-to-worker: true
+
+  # --- OpenTelemetry tracing ---
+  otel:
+    exporter:
+      otlp:
+        endpoint: http://localhost:4317
+    traces:
+      enabled: true
+
+  # --- Container image (enable for docker-compose: -Dquarkus.container-image.build=true) ---
+  container-image:
+    build: false
+    name: solar-csms
+
+# --- Application defaults ---
+app:
+  location:
+    default-radius-m: 50000
