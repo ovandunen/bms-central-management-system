@@ -43,7 +43,9 @@ class LocationQueryServiceTest {
         locationRepository.deleteAll();
 
         ChargingStation berlin = new ChargingStation("CP-BERLIN", 2);
+        berlin.updateStatus(com.solarcsms.station.domain.StationStatus.AVAILABLE);
         ChargingStation far = new ChargingStation("CP-FAR", 1);
+        far.updateStatus(com.solarcsms.station.domain.StationStatus.AVAILABLE);
         stationRepository.persist(berlin);
         stationRepository.persist(far);
 
