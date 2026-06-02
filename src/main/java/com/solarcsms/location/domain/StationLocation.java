@@ -31,6 +31,12 @@ public class StationLocation {
     @Column(name = "display_name")
     private String displayName;
 
+    @Column(name = "street_address")
+    private String streetAddress;
+
+    @Column(name = "city")
+    private String city;
+
     @Column(name = "solar_capacity_kw")
     private double solarCapacityKw;
 
@@ -52,9 +58,20 @@ public class StationLocation {
      */
     public StationLocation(String stationId, double latitude, double longitude,
                            String displayName, double solarCapacityKw) {
+        this(stationId, latitude, longitude, displayName, null, null, solarCapacityKw);
+    }
+
+    /**
+     * Creates a station location with optional postal address fields.
+     */
+    public StationLocation(String stationId, double latitude, double longitude,
+                           String displayName, String streetAddress, String city,
+                           double solarCapacityKw) {
         this.id = UUID.randomUUID();
         this.stationId = stationId;
         this.displayName = displayName;
+        this.streetAddress = streetAddress;
+        this.city = city;
         this.solarCapacityKw = solarCapacityKw;
         this.location = GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude));
     }
@@ -69,6 +86,14 @@ public class StationLocation {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getStreetAddress() {
+        return streetAddress;
+    }
+
+    public String getCity() {
+        return city;
     }
 
     public double getSolarCapacityKw() {

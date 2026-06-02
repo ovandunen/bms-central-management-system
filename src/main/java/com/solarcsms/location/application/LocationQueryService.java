@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solarcsms.location.domain.LocationRepository;
 import com.solarcsms.location.domain.StationLocation;
 import com.solarcsms.location.infrastructure.DynamicMqttPublisher;
+import com.solarcsms.station.domain.ChargingStation;
+import com.solarcsms.station.domain.StationRepository;
+import com.solarcsms.station.domain.StationStatus;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -22,6 +25,7 @@ public class LocationQueryService {
     private static final Logger LOG = Logger.getLogger(LocationQueryService.class);
 
     private final LocationRepository locationRepository;
+    private final StationRepository stationRepository;
     private final DynamicMqttPublisher mqttPublisher;
     private final ObjectMapper objectMapper;
 
@@ -29,9 +33,11 @@ public class LocationQueryService {
     double defaultRadiusMeters;
 
     public LocationQueryService(LocationRepository locationRepository,
+                                StationRepository stationRepository,
                                 DynamicMqttPublisher mqttPublisher,
                                 ObjectMapper objectMapper) {
         this.locationRepository = locationRepository;
+        this.stationRepository = stationRepository;
         this.mqttPublisher = mqttPublisher;
         this.objectMapper = objectMapper;
     }
@@ -50,7 +56,10 @@ public class LocationQueryService {
                     radius);
 
             List<StationLocationDto> payload = nearby.stream()
-                    .map(StationLocationDto::from)
+                    .map(loc -> stationRepository.findByStationId(loc.getStationId())
+                            .map(cs -> StationLocationDto.from(loc, cs.getStatus()))
+                            .orElse(null))
+                    .filter(dto -> dto != null && StationStatus.AVAILABLE.name().equals(dto.status()))
                     .toList();
 
             String topic = "stations/available/" + query.driverId();
