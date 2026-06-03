@@ -12,7 +12,7 @@ public class InMemoryMessagingTestResource implements QuarkusTestResourceLifecyc
 
     @Override
     public Map<String, String> start() {
-        InMemoryConnector.switchIncomingChannelsToInMemory("driver-location-request");
+        InMemoryConnector.switchIncomingChannelsToInMemory("vehicle-location-request");
         InMemoryConnector.switchOutgoingChannelsToInMemory("station-location-response");
         return Map.of();
     }

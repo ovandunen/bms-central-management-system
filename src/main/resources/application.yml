@@ -11,21 +11,20 @@ mp:
         port: 1883
         client-id: solar-csms
 
-    # --- Inbound: driver location requests (wildcard topic) ---
+    # --- Inbound: vehicle location requests (BMS / VCU — not the mobile driver app) ---
     incoming:
-      driver-location-request:
+      vehicle-location-request:
         connector: smallrye-mqtt
-        topic: "drivers/+/request/location"
+        topic: "vehicles/+/request/location"
         qos: 1
 
-    # --- Outbound: static channel (dynamic publishes use MqttClient directly) ---
+    # --- Outbound: per-vehicle topic via SendingMqttMessageMetadata (producer: MqttStationResponsePublisher) ---
     outgoing:
       station-location-response:
         connector: smallrye-mqtt
-        topic: stations/available/broadcast
         qos: 1
 
-# --- PostgreSQL + Hibernate ORM ---
+# --- PostgreSQL + PostGIS (runtime / docker compose stack) ---
 quarkus:
   datasource:
     db-kind: postgresql
@@ -67,3 +66,6 @@ quarkus:
 app:
   location:
     default-radius-m: 50000
+    demo-default-latitude: 52.52
+    demo-default-longitude: 13.405
+    demo-default-solar-kw: 120

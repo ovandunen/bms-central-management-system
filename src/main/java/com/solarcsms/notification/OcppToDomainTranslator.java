@@ -2,6 +2,7 @@ package com.solarcsms.notification;
 
 import com.solarcsms.station.application.StationAvailableEvent;
 import com.solarcsms.station.application.StationOfflineEvent;
+import com.solarcsms.station.application.StationRegisteredEvent;
 
 import eu.chargetime.ocpp.model.core.ChargePointStatus;
 import eu.chargetime.ocpp.model.core.StatusNotificationRequest;
@@ -23,13 +24,16 @@ public class OcppToDomainTranslator {
     private final OcppMapper ocppMapper;
     private final Event<StationAvailableEvent> availableEvent;
     private final Event<StationOfflineEvent> offlineEvent;
+    private final Event<StationRegisteredEvent> registeredEvent;
 
     public OcppToDomainTranslator(OcppMapper ocppMapper,
                                    Event<StationAvailableEvent> availableEvent,
-                                   Event<StationOfflineEvent> offlineEvent) {
+                                   Event<StationOfflineEvent> offlineEvent,
+                                   Event<StationRegisteredEvent> registeredEvent) {
         this.ocppMapper = ocppMapper;
         this.availableEvent = availableEvent;
         this.offlineEvent = offlineEvent;
+        this.registeredEvent = registeredEvent;
     }
 
     /**
@@ -79,7 +83,11 @@ public class OcppToDomainTranslator {
      */
     public Optional<Void> translateBootNotification(String chargePointId, String vendor, String model) {
         LOG.infof("BootNotification from %s (%s / %s)", chargePointId, vendor, model);
-        // TODO: provision new ChargingStation + StationLocation records
+        registeredEvent.fire(new StationRegisteredEvent(
+                chargePointId,
+                vendor,
+                model,
+                Instant.now()));
         return Optional.empty();
     }
 }

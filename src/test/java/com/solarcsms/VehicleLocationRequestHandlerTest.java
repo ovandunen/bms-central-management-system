@@ -1,9 +1,9 @@
 package com.solarcsms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.solarcsms.driver.domain.LocationRequest;
 import com.solarcsms.support.InMemoryMessagingTestResource;
 import com.solarcsms.support.NearbyStationQueryCaptor;
+import com.solarcsms.vehicle.domain.VehicleLocationRequest;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
@@ -22,11 +22,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies MQTT driver location requests fire {@link com.solarcsms.location.application.NearbyStationQuery}.
+ * Verifies MQTT vehicle location requests fire {@link com.solarcsms.location.application.NearbyStationQuery}.
  */
 @QuarkusTest
 @QuarkusTestResource(InMemoryMessagingTestResource.class)
-class DriverRequestHandlerTest {
+class VehicleLocationRequestHandlerTest {
 
     @Inject
     @Any
@@ -45,15 +45,16 @@ class DriverRequestHandlerTest {
 
     @Test
     void mqttLocationRequestFiresNearbyStationQuery() throws Exception {
-        InMemorySource<Message<byte[]>> source = connector.source("driver-location-request");
-        LocationRequest request = new LocationRequest("test", 52.52, 13.405, 10_000);
+        InMemorySource<Message<byte[]>> source = connector.source("vehicle-location-request");
+        VehicleLocationRequest request =
+                new VehicleLocationRequest("vehicle-001", 52.52, 13.405, 10_000);
         byte[] payload = objectMapper.writeValueAsBytes(request);
 
         source.send(Message.of(payload)
-                .addMetadata(MqttMessage.of("drivers/test/request/location", payload)));
+                .addMetadata(MqttMessage.of("vehicles/vehicle-001/request/location", payload)));
 
         assertTrue(awaitQuery(), "NearbyStationQuery should be observed");
-        assertEquals("test", queryCaptor.lastQuery().get().driverId());
+        assertEquals("vehicle-001", queryCaptor.lastQuery().get().vehicleId());
         assertEquals(52.52, queryCaptor.lastQuery().get().coordinate().latitude(), 0.001);
     }
 

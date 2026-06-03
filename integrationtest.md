@@ -51,8 +51,8 @@ mosquitto_sub -h localhost -p 1883 -t "stations/available/vehicle-001"
 
 # Then publish a location request as the BMS Monitor would
 mosquitto_pub -h localhost -p 1883 \
-  -t "drivers/vehicle-001/request/location" \
-  -m '{"driverId":"vehicle-001","latitude":52.52,"longitude":13.405,"radiusMeters":10000}'
+  -t "vehicles/vehicle-001/request/location" \
+  -m '{"vehicleId":"vehicle-001","latitude":52.52,"longitude":13.405,"radiusMeters":10000}'
 ```
 
 The `mosquitto_sub` terminal should receive a JSON array of the available stations you registered in Steps 2–4.

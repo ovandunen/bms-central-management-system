@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.solarcsms.location.domain.LocationRepository;
 import com.solarcsms.location.domain.StationLocation;
-import com.solarcsms.location.infrastructure.DynamicMqttPublisher;
+import com.solarcsms.location.infrastructure.MqttStationResponsePublisher;
 import com.solarcsms.station.domain.ChargingStation;
 import com.solarcsms.station.domain.StationRepository;
 import com.solarcsms.station.domain.StationStatus;
@@ -26,7 +26,7 @@ public class LocationQueryService {
 
     private final LocationRepository locationRepository;
     private final StationRepository stationRepository;
-    private final DynamicMqttPublisher mqttPublisher;
+    private final MqttStationResponsePublisher mqttPublisher;
     private final ObjectMapper objectMapper;
 
     @ConfigProperty(name = "app.location.default-radius-m", defaultValue = "50000")
@@ -34,7 +34,7 @@ public class LocationQueryService {
 
     public LocationQueryService(LocationRepository locationRepository,
                                 StationRepository stationRepository,
-                                DynamicMqttPublisher mqttPublisher,
+                                MqttStationResponsePublisher mqttPublisher,
                                 ObjectMapper objectMapper) {
         this.locationRepository = locationRepository;
         this.stationRepository = stationRepository;
@@ -43,7 +43,7 @@ public class LocationQueryService {
     }
 
     /**
-     * Handles a {@link NearbyStationQuery} CDI event from the driver context.
+     * Handles a {@link NearbyStationQuery} CDI event from the vehicle context.
      *
      * @param query nearby station search request
      */
@@ -62,15 +62,15 @@ public class LocationQueryService {
                     .filter(dto -> dto != null && StationStatus.AVAILABLE.name().equals(dto.status()))
                     .toList();
 
-            String topic = "stations/available/" + query.driverId();
+            String topic = "stations/available/" + query.vehicleId();
             byte[] body = objectMapper.writeValueAsBytes(payload);
             mqttPublisher.publish(topic, body);
             LOG.infof("Published %d stations to %s", payload.size(), topic);
         } catch (JsonProcessingException e) {
-            LOG.errorf(e, "Failed to serialize station locations for driver %s", query.driverId());
+            LOG.errorf(e, "Failed to serialize station locations for vehicle %s", query.vehicleId());
         } catch (Exception e) {
-            LOG.errorf(e, "Failed to process nearby station query for driver %s", query.driverId());
+            LOG.errorf(e, "Failed to process nearby station query for vehicle %s", query.vehicleId());
         }
-        // TODO: apply driver-specific filters (connector type, pricing, solar preference)
+        // TODO: apply vehicle-specific filters (connector type, pricing, solar preference)
     }
 }

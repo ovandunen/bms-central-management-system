@@ -4,10 +4,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 
 import java.util.UUID;
 
@@ -17,9 +13,6 @@ import java.util.UUID;
 @Entity
 @Table(name = "station_location")
 public class StationLocation {
-
-    private static final GeometryFactory GEOMETRY_FACTORY =
-            new GeometryFactory(new PrecisionModel(), 4326);
 
     @Id
     @Column(name = "id", nullable = false, updatable = false)
@@ -40,8 +33,11 @@ public class StationLocation {
     @Column(name = "solar_capacity_kw")
     private double solarCapacityKw;
 
-    @Column(name = "location", columnDefinition = "geometry(Point,4326)", nullable = false)
-    private Point location;
+    @Column(name = "latitude", nullable = false)
+    private double latitude;
+
+    @Column(name = "longitude", nullable = false)
+    private double longitude;
 
     protected StationLocation() {
         // JPA
@@ -73,7 +69,8 @@ public class StationLocation {
         this.streetAddress = streetAddress;
         this.city = city;
         this.solarCapacityKw = solarCapacityKw;
-        this.location = GEOMETRY_FACTORY.createPoint(new Coordinate(longitude, latitude));
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public UUID getId() {
@@ -100,17 +97,13 @@ public class StationLocation {
         return solarCapacityKw;
     }
 
-    public Point getLocation() {
-        return location;
-    }
-
     /**
      * Returns latitude in degrees.
      *
      * @return latitude
      */
     public double getLatitude() {
-        return location.getY();
+        return latitude;
     }
 
     /**
@@ -119,6 +112,6 @@ public class StationLocation {
      * @return longitude
      */
     public double getLongitude() {
-        return location.getX();
+        return longitude;
     }
 }

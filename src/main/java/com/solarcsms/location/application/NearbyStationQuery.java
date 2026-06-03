@@ -3,11 +3,11 @@ package com.solarcsms.location.application;
 import com.solarcsms.location.domain.GeoCoordinate;
 
 /**
- * CDI event representing a driver request for nearby charging stations.
+ * CDI event: a vehicle requested nearby charging stations (vehicle MQTT channel).
  *
- * @param driverId       external driver identifier (MQTT topic segment)
+ * @param vehicleId      vehicle identifier (MQTT topic segment)
  * @param coordinate     search center
  * @param radiusMeters   search radius in metres
  */
-public record NearbyStationQuery(String driverId, GeoCoordinate coordinate, double radiusMeters) {
+public record NearbyStationQuery(String vehicleId, GeoCoordinate coordinate, double radiusMeters) {
 }

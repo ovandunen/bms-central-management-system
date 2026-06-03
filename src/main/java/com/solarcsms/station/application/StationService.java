@@ -27,6 +27,20 @@ public class StationService {
     }
 
     /**
+     * Persists a charge point after OCPP BootNotification (no GPS in payload).
+     *
+     * @param event registration domain event
+     */
+    @Transactional
+    public void onStationRegistered(@Observes StationRegisteredEvent event) {
+        LOG.infof("Station registered: %s (%s / %s)", event.stationId(), event.vendor(), event.model());
+        ChargingStation station = stationRepository.findByStationId(event.stationId())
+                .orElseGet(() -> new ChargingStation(event.stationId(), 1));
+        station.recordHeartbeat(event.occurredAt());
+        stationRepository.persist(station);
+    }
+
+    /**
      * Handles station availability transitions from the notification anti-corruption layer.
      *
      * @param event availability domain event

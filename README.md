@@ -8,13 +8,13 @@ Central System Management System (CSMS) for solar-powered EV charging stations. 
 |---------|----------------|
 | `station` | Charging station lifecycle and OCPP-derived status |
 | `location` | PostGIS geospatial storage and nearby-station queries |
-| `driver` | MQTT driver requests → `NearbyStationQuery` events |
+| `vehicle` | MQTT vehicle location requests → `NearbyStationQuery` events |
 | `notification` | OCPP 1.6 WebSocket ACL (anti-corruption layer) |
 
 ## Prerequisites
 
-- Java 21+
-- Docker & Docker Compose (for local infra)
+- **Docker** & Docker Compose (tests, infra, and full stack)
+- Java 21+ (only if you run `./mvnw` on the host instead of in Compose)
 
 The repo includes a **Maven Wrapper** (`./mvnw`); a system Maven install is optional.
 
@@ -39,19 +39,22 @@ This starts **PostgreSQL + PostGIS** on port `5432` and **Mosquitto** on `1883` 
 Flyway applies `V1__init.sql` on startup. The CSMS listens on:
 
 - HTTP/WebSocket: `ws://localhost:8080/ocpp/{chargePointId}` (OCPP 1.6 JSON)
-- MQTT inbound: `drivers/{driverId}/request/location`
-- MQTT outbound: `stations/available/{driverId}` (dynamic, via `MqttClient`)
+- MQTT inbound: `vehicles/{vehicleId}/request/location` (BMS / VCU — not the mobile driver app)
+- MQTT outbound: `stations/available/{vehicleId}` (via `station-location-response` + `MqttStationResponsePublisher`)
 
-### 3. Run tests
+### 3. Run tests (automation / CI)
+
+Uses **PostGIS** and **Mosquitto** (same as production). Recommended — runs Maven inside Compose against `postgres` and `mosquitto`:
 
 ```bash
-./mvnw test
+docker compose run --rm test
 ```
 
-PostGIS spatial tests are tagged `postgis` and excluded from the default test run. Execute them with Docker available:
+On the host (with infra already up via Compose):
 
 ```bash
-./mvnw test -DexcludedGroups= -Dgroups=postgis
+docker compose up -d postgres mosquitto
+./mvnw test
 ```
 
 ### 4. Full stack with Docker
@@ -68,22 +71,22 @@ docker compose up --build
 docker compose up
 ```
 
-## Example MQTT driver request
+## Example MQTT vehicle location request
 
-Topic: `drivers/alice/request/location`
+Topic: `vehicles/vehicle-001/request/location`
 
 Payload:
 
 ```json
 {
-  "driverId": "alice",
+  "vehicleId": "vehicle-001",
   "latitude": 52.52,
   "longitude": 13.405,
   "radiusMeters": 10000
 }
 ```
 
-Response is published to `stations/available/alice` as a JSON array of station locations.
+Response is published to `stations/available/vehicle-001` as a JSON array of station locations.
 
 ## Example OCPP StatusNotification
 
