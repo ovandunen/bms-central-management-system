@@ -56,7 +56,7 @@ public class OcppToDomainTranslator {
                     "OCPP status: " + status,
                     occurredAt));
         }
-        // TODO: map Occupied, Preparing, Charging, etc. to StationStatus.OCCUPIED
+        // AI TODO: map Occupied, Preparing, Charging, etc. to StationStatus.OCCUPIED
     }
 
     /**
