@@ -2,6 +2,7 @@ package ch.ecocarsolaire.csms.notification;
 
 import ch.ecocarsolaire.csms.station.application.StationAvailableEvent;
 import ch.ecocarsolaire.csms.station.application.StationOfflineEvent;
+import ch.ecocarsolaire.csms.station.application.StationOccupiedEvent;
 
 import eu.chargetime.ocpp.model.core.ChargePointStatus;
 import eu.chargetime.ocpp.model.core.StatusNotificationRequest;
@@ -23,13 +24,16 @@ public class OcppToDomainTranslator {
     private final OcppMapper ocppMapper;
     private final Event<StationAvailableEvent> availableEvent;
     private final Event<StationOfflineEvent> offlineEvent;
+    private final Event<StationOccupiedEvent> occupiedEvent;
 
     public OcppToDomainTranslator(OcppMapper ocppMapper,
                                    Event<StationAvailableEvent> availableEvent,
-                                   Event<StationOfflineEvent> offlineEvent) {
+                                   Event<StationOfflineEvent> offlineEvent,
+                                   Event<StationOccupiedEvent> occupiedEvent) {
         this.ocppMapper = ocppMapper;
         this.availableEvent = availableEvent;
         this.offlineEvent = offlineEvent;
+        this.occupiedEvent = occupiedEvent;
     }
 
     /**
@@ -50,13 +54,16 @@ public class OcppToDomainTranslator {
             return;
         }
 
+        if (status == ChargePointStatus.Occupied || status == ChargePointStatus.Preparing || status == ChargePointStatus.Charging) {
+            occupiedEvent.fireAsync(new StationOccupiedEvent(chargePointId, connectorId, occurredAt));
+        }
+
         if (status == ChargePointStatus.Unavailable || status == ChargePointStatus.Faulted) {
             offlineEvent.fireAsync(new StationOfflineEvent(
                     chargePointId,
                     "OCPP status: " + status,
                     occurredAt));
         }
-        // AI TODO: map Occupied, Preparing, Charging, etc. to StationStatus.OCCUPIED
     }
 
     /**
