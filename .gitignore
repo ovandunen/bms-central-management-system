@@ -11,3 +11,6 @@ target/
 target/
 docs/
 .mvn/
+.github
+src/e2e/__pycache__
+src/e2e/python/__pycache__
