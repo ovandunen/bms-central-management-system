@@ -1,0 +1,91 @@
+# E2E black-box stack for Solar CSMS (Stories 2.1–2.3).
+# Requires a prior JVM build: make e2e-build
+#
+# Host ports avoid collisions with local docker-compose.yml:
+#   Postgres 5433, MQTT 1884, CSMS 8081, WireMock KI 8090
+#
+# Usage:
+#   make e2e-up / make e2e-test / make e2e-down
+
+services:
+  postgres-e2e:
+    image: postgis/postgis:16-3.4
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: csms
+      POSTGRES_PASSWORD: csms
+      POSTGRES_DB: csmsdb
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U csms -d csmsdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  mosquitto-e2e:
+    image: eclipse-mosquitto:2.0
+    ports:
+      - "1884:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_sub -h localhost -t '$$SYS/#' -C 1 -i healthcheck -W 3"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  wiremock-ki-e2e:
+    image: wiremock/wiremock:3.10.0
+    ports:
+      - "8090:8080"
+    volumes:
+      - ./src/e2e/resources:/home/wiremock
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/__admin/health || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+  solar-csms-app:
+    build:
+      context: .
+      dockerfile: src/main/docker/Dockerfile.jvm
+    ports:
+      - "8081:8080"
+    environment:
+      QUARKUS_DATASOURCE_JDBC_URL: jdbc:postgresql://postgres-e2e:5432/csmsdb
+      QUARKUS_DATASOURCE_USERNAME: csms
+      QUARKUS_DATASOURCE_PASSWORD: csms
+      MP_MESSAGING_CONNECTOR_SMALLRYE_MQTT_HOST: mosquitto-e2e
+      MP_MESSAGING_CONNECTOR_SMALLRYE_MQTT_PORT: "1883"
+      KI_SERVICE_URL: http://wiremock-ki-e2e:8080
+      QUARKUS_REST_CLIENT_KI_SERVICE_URL: http://wiremock-ki-e2e:8080
+      QUARKUS_OTEL_TRACES_ENABLED: "false"
+      APP_SWAP_COOLDOWN_SECONDS: "5"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sS http://localhost:8080/ >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+      start_period: 30s
+    depends_on:
+      postgres-e2e:
+        condition: service_healthy
+      mosquitto-e2e:
+        condition: service_healthy
+      wiremock-ki-e2e:
+        condition: service_healthy
+
+  e2e-tester:
+    build:
+      context: ./src/e2e
+      dockerfile: Dockerfile
+    command: ["pytest", "-v"]
+    volumes:
+      - ./src/e2e:/tests
+    depends_on:
+      solar-csms-app:
+        condition: service_healthy
