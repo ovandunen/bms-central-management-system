@@ -14,3 +14,4 @@ docs/
 .github
 src/e2e/__pycache__
 src/e2e/python/__pycache__
+.aider*

@@ -2,7 +2,7 @@ package ch.ecocarsolaire.csms.swap.infrastructure.ingest;
 
 import ch.ecocarsolaire.csms.swap.application.port.dto.KiOptimizationRequest;
 import ch.ecocarsolaire.csms.swap.application.port.dto.VehicleTelemetryMessage;
-import ch.ecocarsolaire.csms.swap.application.service.OptimizeSwapMomentUseCase;
+import ch.ecocarsolaire.csms.swap.application.service.OptimizeSwapMoment;
 import ch.ecocarsolaire.support.InMemoryMessagingTestResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.test.InjectMock;
@@ -34,7 +34,7 @@ class VehicleTelemetryMqttHandlerTest {
   ObjectMapper objectMapper;
 
   @InjectMock
-  OptimizeSwapMomentUseCase optimizeSwapMomentUseCase;
+  OptimizeSwapMoment optimizeSwapMomentUseCase;
 
   @Test
   void telemetryOnMqttTopicTriggersSwapOptimization() throws Exception {

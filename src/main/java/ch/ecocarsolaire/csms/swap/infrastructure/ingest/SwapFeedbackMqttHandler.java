@@ -1,7 +1,7 @@
 package ch.ecocarsolaire.csms.swap.infrastructure.ingest;
 
 import ch.ecocarsolaire.csms.swap.application.port.dto.SwapFeedbackMessage;
-import ch.ecocarsolaire.csms.swap.application.service.RecordSwapFeedbackUseCase;
+import ch.ecocarsolaire.csms.swap.application.service.DriverFeedback;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.reactive.messaging.mqtt.MqttMessage;
@@ -24,11 +24,11 @@ public class SwapFeedbackMqttHandler {
     private static final Logger LOG = Logger.getLogger(SwapFeedbackMqttHandler.class);
     private static final Pattern TOPIC_PATTERN = Pattern.compile("^vehicles/([^/]+)/swap/feedback$");
 
-    private final RecordSwapFeedbackUseCase recordSwapFeedbackUseCase;
+    private final DriverFeedback recordSwapFeedbackUseCase;
     private final ObjectMapper objectMapper;
 
     public SwapFeedbackMqttHandler(
-            RecordSwapFeedbackUseCase recordSwapFeedbackUseCase,
+            DriverFeedback recordSwapFeedbackUseCase,
             ObjectMapper objectMapper) {
         this.recordSwapFeedbackUseCase = recordSwapFeedbackUseCase;
         this.objectMapper = objectMapper;

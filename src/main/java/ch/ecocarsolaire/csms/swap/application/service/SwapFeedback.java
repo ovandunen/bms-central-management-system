@@ -18,15 +18,15 @@ import java.util.Map;
  * Exports unprocessed swap feedback to the KI retraining endpoint (Story 3.2).
  */
 @ApplicationScoped
-public class ExportSwapFeedbackUseCase {
+public class SwapFeedback {
 
-    private static final Logger LOG = Logger.getLogger(ExportSwapFeedbackUseCase.class);
+    private static final Logger LOG = Logger.getLogger(SwapFeedback.class);
 
     private final SwapFeedbackRepository feedbackRepository;
     private final SwapRecommendationRepository recommendationRepository;
     private final KiFeedbackRemoteApi kiFeedbackApi;
 
-    public ExportSwapFeedbackUseCase(
+    public SwapFeedback(
             SwapFeedbackRepository feedbackRepository,
             SwapRecommendationRepository recommendationRepository,
             @RestClient KiFeedbackRemoteApi kiFeedbackApi) {

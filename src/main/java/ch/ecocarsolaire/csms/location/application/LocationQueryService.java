@@ -64,14 +64,14 @@ public class LocationQueryService {
     public void onNearbyStationQuery(@Observes NearbyStationQuery query) {
         try {
             double radius = query.radiusMeters() > 0 ? query.radiusMeters() : defaultRadiusMeters;
-            List<StationLocation> nearby = locationRepository.findNearby(
+            final List<StationLocation> nearby = locationRepository.findNearby(
                     query.coordinate().latitude(),
                     query.coordinate().longitude(),
                     radius);
 
-            Duration maxAge = Duration.ofMinutes(swapTelemetryMaxAgeMinutes);
-            Instant now = Instant.now();
-            List<StationLocationDto> payload = new ArrayList<>();
+            final Duration maxAge = Duration.ofMinutes(swapTelemetryMaxAgeMinutes);
+            final Instant now = Instant.now();
+            final List<StationLocationDto> payload = new ArrayList<>();
 
             for (StationLocation loc : nearby) {
                 var stationOpt = stationRepository.findByStationId(loc.getStationId());
@@ -80,7 +80,7 @@ public class LocationQueryService {
                     continue;
                 }
 
-                StationSwapState swapState = swapStateRepository.findByStationId(loc.getStationId()).orElse(null);
+                final StationSwapState swapState = swapStateRepository.findByStationId(loc.getStationId()).orElse(null);
                 if (SwapStationEligibilityPolicy.isStale(swapState, maxAge, now)) {
                     LOG.warnf("Excluding station %s — swap telemetry stale", loc.getStationId());
                     continue;
@@ -89,7 +89,7 @@ public class LocationQueryService {
                     continue;
                 }
 
-                double distanceKm = haversineMeters(
+                final double distanceKm = haversineMeters(
                         query.coordinate().latitude(),
                         query.coordinate().longitude(),
                         loc.getLatitude(),
@@ -98,12 +98,12 @@ public class LocationQueryService {
                         loc, stationOpt.get().getStatus(), swapState, distanceKm));
             }
 
-            StationAvailabilityResponse response = payload.isEmpty()
+            final StationAvailabilityResponse response = payload.isEmpty()
                     ? StationAvailabilityResponse.empty(query.correlationId(), EMPTY_MESSAGE)
                     : StationAvailabilityResponse.withStations(query.correlationId(), payload);
 
-            String topic = "stations/available/" + query.driverId();
-            byte[] body = objectMapper.writeValueAsBytes(response);
+            final String topic = "stations/available/" + query.driverId();
+            final byte[] body = objectMapper.writeValueAsBytes(response);
             mqttPublisher.publish(topic, body);
             LOG.infof("Published %d swap stations to %s (correlationId=%s)",
                     payload.size(), topic, query.correlationId());

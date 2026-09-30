@@ -15,16 +15,16 @@ import java.util.Set;
  * Records driver feedback for swap recommendations (Story 3.1).
  */
 @ApplicationScoped
-public class RecordSwapFeedbackUseCase {
+public class DriverFeedback {
 
-    private static final Logger LOG = Logger.getLogger(RecordSwapFeedbackUseCase.class);
+    private static final Logger LOG = Logger.getLogger(DriverFeedback.class);
     private static final Set<String> ALLOWED_STATES =
             Set.of("accepted", "dismissed", "completed", "expired");
 
     private final SwapFeedbackRepository feedbackRepository;
     private final SwapRecommendationRepository recommendationRepository;
 
-    public RecordSwapFeedbackUseCase(
+    public DriverFeedback(
             SwapFeedbackRepository feedbackRepository,
             SwapRecommendationRepository recommendationRepository) {
         this.feedbackRepository = feedbackRepository;

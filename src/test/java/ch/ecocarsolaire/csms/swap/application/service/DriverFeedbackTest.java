@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @QuarkusTest
 @Tag("unit")
-class RecordSwapFeedbackUseCaseTest {
+class DriverFeedbackTest {
 
     @Inject
-    RecordSwapFeedbackUseCase useCase;
+    DriverFeedback useCase;
 
     @Inject
     SwapRecommendationRepository recommendationRepository;

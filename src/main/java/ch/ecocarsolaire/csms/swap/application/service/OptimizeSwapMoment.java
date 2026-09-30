@@ -24,9 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
  * Orchestrates KI pattern recognition and rule-based scoring to decide the optimum battery swap moment (UC-05).
  */
 @ApplicationScoped
-public class OptimizeSwapMomentUseCase {
+public class OptimizeSwapMoment {
 
-  private static final Logger LOG = LoggerFactory.getLogger(OptimizeSwapMomentUseCase.class);
+  private static final Logger LOG = LoggerFactory.getLogger(OptimizeSwapMoment.class);
   private static final double KI_BLEND_WEIGHT = 0.5;
   private static final double RULE_BLEND_WEIGHT = 0.5;
   private static final double DECISION_THRESHOLD = 0.5;
@@ -44,7 +44,7 @@ public class OptimizeSwapMomentUseCase {
   @ConfigProperty(name = "app.swap.cooldown-seconds", defaultValue = "900")
   long cooldownSeconds;
 
-  public OptimizeSwapMomentUseCase(
+  public OptimizeSwapMoment(
       KiOptimizationPort kiPort,
       SwapOptimizationEmitterPort optimizationEmitter,
       SwapRecommendationEmitterPort recommendationEmitter,

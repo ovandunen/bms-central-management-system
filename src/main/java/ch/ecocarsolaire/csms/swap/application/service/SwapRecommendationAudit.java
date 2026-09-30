@@ -14,13 +14,13 @@ import java.time.Instant;
  * Persists swap recommendations for audit and feedback correlation (Story 3.1).
  */
 @ApplicationScoped
-public class SwapRecommendationAuditService {
+public class          SwapRecommendationAudit {
 
-    private static final Logger LOG = Logger.getLogger(SwapRecommendationAuditService.class);
+    private static final Logger LOG = Logger.getLogger(SwapRecommendationAudit.class);
 
     private final SwapRecommendationRepository repository;
 
-    public SwapRecommendationAuditService(SwapRecommendationRepository repository) {
+    public SwapRecommendationAudit(SwapRecommendationRepository repository) {
         this.repository = repository;
     }
 

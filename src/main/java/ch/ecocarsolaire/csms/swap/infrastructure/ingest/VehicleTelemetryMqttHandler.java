@@ -1,7 +1,7 @@
 package ch.ecocarsolaire.csms.swap.infrastructure.ingest;
 
 import ch.ecocarsolaire.csms.swap.application.port.dto.VehicleTelemetryMessage;
-import ch.ecocarsolaire.csms.swap.application.service.OptimizeSwapMomentUseCase;
+import ch.ecocarsolaire.csms.swap.application.service.OptimizeSwapMoment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.smallrye.common.annotation.Blocking;
 import io.smallrye.reactive.messaging.mqtt.MqttMessage;
@@ -24,11 +24,11 @@ public class VehicleTelemetryMqttHandler {
   private static final Logger LOG = Logger.getLogger(VehicleTelemetryMqttHandler.class);
   private static final Pattern TOPIC_PATTERN = Pattern.compile("^vehicles/([^/]+)/telemetry$");
 
-  private final OptimizeSwapMomentUseCase optimizeSwapMomentUseCase;
+  private final OptimizeSwapMoment optimizeSwapMomentUseCase;
   private final ObjectMapper objectMapper;
 
   public VehicleTelemetryMqttHandler(
-      OptimizeSwapMomentUseCase optimizeSwapMomentUseCase,
+      OptimizeSwapMoment optimizeSwapMomentUseCase,
       ObjectMapper objectMapper) {
     this.optimizeSwapMomentUseCase = optimizeSwapMomentUseCase;
     this.objectMapper = objectMapper;

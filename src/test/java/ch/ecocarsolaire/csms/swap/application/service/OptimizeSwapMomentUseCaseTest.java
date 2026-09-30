@@ -40,7 +40,7 @@ class OptimizeSwapMomentUseCaseTest {
   SwapRecommendationEmitterPort recommendationEmitter;
 
   @Inject
-  OptimizeSwapMomentUseCase useCase;
+  OptimizeSwapMoment useCase;
 
   @BeforeEach
   void resetMocks() {

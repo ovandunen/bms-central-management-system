@@ -1,6 +1,6 @@
 package ch.ecocarsolaire.csms.swap.infrastructure.api;
 
-import ch.ecocarsolaire.csms.swap.application.service.ExportSwapFeedbackUseCase;
+import ch.ecocarsolaire.csms.swap.application.service.SwapFeedback;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -18,12 +18,12 @@ import java.util.Map;
 public class FeedbackExportResource {
 
     @Inject
-    ExportSwapFeedbackUseCase exportSwapFeedbackUseCase;
+    SwapFeedback swapFeedback;
 
     @POST
     @Path("/export")
     public Response export() {
-        int exported = exportSwapFeedbackUseCase.execute();
+        int exported = swapFeedback.execute();
         return Response.ok(Map.of("exported", exported)).build();
     }
 }
