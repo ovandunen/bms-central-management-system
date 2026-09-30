@@ -54,7 +54,7 @@ public class OcppToDomainTranslator {
             return;
         }
 
-        if (status == ChargePointStatus.Occupied || status == ChargePointStatus.Preparing || status == ChargePointStatus.Charging) {
+        if (status == ChargePointStatus.Preparing || status == ChargePointStatus.Charging) {
             occupiedEvent.fireAsync(new StationOccupiedEvent(chargePointId, connectorId, occurredAt));
         }
 
