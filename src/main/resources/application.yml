@@ -18,6 +18,16 @@ mp:
         topic: "drivers/+/request/location"
         qos: 1
 
+      vehicle-telemetry:
+        connector: smallrye-mqtt
+        topic: "vehicles/+/telemetry"
+        qos: 1
+
+      swap-feedback:
+        connector: smallrye-mqtt
+        topic: "vehicles/+/swap/feedback"
+        qos: 1
+
     # --- Outbound: static channel (dynamic publishes use MqttClient directly) ---
     outgoing:
       station-location-response:
@@ -27,6 +37,8 @@ mp:
 
 # --- PostgreSQL + Hibernate ORM ---
 quarkus:
+  arc:
+    async-observer-methods-enabled: true
   datasource:
     db-kind: postgresql
     username: csms
@@ -63,7 +75,20 @@ quarkus:
     build: false
     name: solar-csms
 
+  # --- External KI REST client (UC-04) ---
+  rest-client:
+    ki-service:
+      url: ${ki.service.url}
+
 # --- Application defaults ---
 app:
   location:
     default-radius-m: 50000
+    swap-telemetry-max-age-minutes: 5
+  swap:
+    cooldown-seconds: 900
+
+# --- External KI optimization service (UC-04) ---
+ki:
+  service:
+    url: http://localhost:8090

@@ -1,6 +1,6 @@
 # Solar Station CSMS
 
-Central System Management System (CSMS) for solar-powered EV charging stations. Built with **Quarkus 3.x** and **Java 21**, following Domain-Driven Design with four bounded contexts that communicate only via CDI events.
+Central System Management System (CSMS) for solar-powered EV charging stations. Built with **Quarkus 3.x** and **Java 21**, following Domain-Driven Design with five bounded contexts that communicate only via CDI events.
 
 ## Architecture
 
@@ -9,7 +9,19 @@ Central System Management System (CSMS) for solar-powered EV charging stations. 
 | `station` | Charging station lifecycle and OCPP-derived status |
 | `location` | PostGIS geospatial storage and nearby-station queries |
 | `driver` | MQTT driver requests → `NearbyStationQuery` events |
+| `swap` | Optimum battery swap moment calculation and MQTT push |
 | `notification` | OCPP 1.6 WebSocket ACL (anti-corruption layer) |
+
+## Swap MQTT topics
+
+The `swap` bounded context publishes two **intentionally distinct** MQTT signals. They serve different consumers and urgency levels — neither replaces or gates the other.
+
+| Purpose | Topic | When published |
+|---------|-------|----------------|
+| **Proactive / predictive** — optimal swap timing from monitoring, prediction, and calculation | `swap/optimization/{vehicleId}` | On every swap decision emitted by `OptimizeSwapMomentUseCase`, **independent of SoC** |
+| **Reactive / necessity** — driver must swap before reaching a station with a charged pack | `vehicles/{vehicleId}/swap/recommendation` | Only when `isLowBattery()` is true: SoC **< 20%** and station inventory **> 0** |
+
+Both payloads include station coordinates (`latitude`, `longitude`) from `station_location` when available.
 
 ## Prerequisites
 
@@ -51,7 +63,20 @@ Flyway applies `V1__init.sql` on startup. The CSMS listens on:
 PostGIS spatial tests are tagged `postgis` and excluded from the default test run. Execute them with Docker available:
 
 ```bash
+./mvnw test -Ppostgis
+# equivalent:
 ./mvnw test -DexcludedGroups= -Dgroups=postgis
+```
+
+### E2E black-box tests (Docker Compose)
+
+Requires Docker. Host ports: Postgres **5433**, MQTT **1884**, CSMS **8081**, WireMock KI **8090**.
+
+```bash
+make e2e-build    # ./mvnw package + build solar-csms-app image
+make e2e-up       # start postgres-e2e, mosquitto-e2e, wiremock-ki-e2e, solar-csms-app
+make e2e-test     # pytest smoke test: verifies Quarkus app boots and KI WireMock stub is reachable
+make e2e-down
 ```
 
 ### 4. Full stack with Docker
